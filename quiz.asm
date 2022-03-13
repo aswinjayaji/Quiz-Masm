@@ -25,7 +25,7 @@ data segment
     crrct db 0ah,0ah,0dh,"Your Answer is correct $"
     wrong db 0ah,0ah,0dh,"Your Answer is wrong $"
     correctAns db 0ah,0dh,"Correct Answer is : $"  
-    cong db 0ah,0ah,0ah,0ah,0ah,0ah,09h,09h,09h,"Congrats! your score is ","$"    
+    cong db 0ah,0ah,0ah,0ah,0ah,0ah,09h,09h,09h,,0ah,"Congrats! your score is ","$"    
     outof db "/9$"
     nl db 0ah,0dh,"$"    
     ans db 34h,32h,31h,32h,34h,34h,33h,32h,32h
@@ -82,7 +82,7 @@ code segment
     mov ds,ax    
      
     
-    lea si,ans   
+       
     insertquiz a9
     insertquiz q9 
     insertquiz a8
@@ -103,6 +103,7 @@ code segment
     insertquiz q1 
     clear
      
+    lea si,ans
     
     mov cl,00h
     loop1: 
@@ -120,9 +121,11 @@ code segment
     display cong  
     add cl,30h  
     output cl 
-    display outof
+    display outof 
+    call timer
     mov ah,4ch   
-    int 21h     
+    int 21h  
+       
     checkans proc
      mov timer_delay,06h 
      input           
@@ -133,12 +136,12 @@ code segment
      cmp al,35h
      jnc invalid
      cmp al,bl
-     jz harp:
+     jz correct:
      display wrong
      displayCrctAns 
      jmp back
      ret
-     harp:
+     correct:
      display crrct 
      inc cl  
      jmp back
@@ -150,6 +153,7 @@ code segment
      call timer
      clear
     endp
+    
     timer proc 
        mov bh,00h
        mov ch,timer_delay
