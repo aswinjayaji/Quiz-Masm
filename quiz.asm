@@ -1,7 +1,7 @@
 data segment  
-    menu db 0dh,0dh,"               QUIZ","$" 
-    
-    q1 db 0ah,0dh,"How to delete a directory in linux?" ,"$"
+    menu db 0dh,0dh,09h,09h,09h,09h,"HANS QUIZ","$" 
+                           
+    q1 db 0ah,0dh,"How to delete an empty directory in linux?" ,"$"
     a1 db 0ah,0dh,"1.remove",0ah,0dh,"2.ls",0ah,0dh,"3.delete",0ah,0dh,"4.rmdir",0ah,0ah,"$"  
     q2 db 0ah,0dh,"Which of the following is a command in Linux?" ,"$"
     a2 db 0ah,0dh,"1.t",0ah,0dh,"2.w",0ah,0dh,"3.x",0ah,0dh,"4.All of the above",0ah,0ah,"$"
@@ -20,14 +20,18 @@ data segment
     q9 db 0ah,0dh,"Which of the following is not a programming language?","$"  
     a9 db 0ah,0dh,"1.Typescript",0ah,0dh,"2.Anaconda",0ah,0dh,"3.Dart",0ah,0dh,"4.Rust",0ah,0ah,"$" 
     
-    crrct db 0ah,0dh,"Your Answer is correct ","$"
-    wrong db 0ah,0dh,"Your Answer is wrong ","$"  
-    cong db "Congrats! your score :","$"    
+    invalidOpt db 0ah,0dh,"Invalid Option !!!$"                 
+    enter db 0ah,0dh,"Enter your answer : $"
+    crrct db 0ah,0ah,0dh,"Your Answer is correct $"
+    wrong db 0ah,0ah,0dh,"Your Answer is wrong $"
+    correctAns db 0ah,0dh,"Correct Answer is : $"  
+    cong db 0ah,0ah,0ah,0ah,0ah,0ah,09h,09h,09h,"Congrats! your score is ","$"    
     outof db "/9$"
     nl db 0ah,0dh,"$"    
-    ans db 33h,32h,31h,32h,34h,34h,33h,32h,32h
+    ans db 34h,32h,31h,32h,34h,34h,33h,32h,32h
     count db 00h
-    countdf db 01h  
+    countdf db 01h   
+    timer_delay db ?
     prevq dw 0ffh dup(?)
     preva dw 0ffh dup(?)
 data ends 
@@ -58,6 +62,16 @@ endm
 displayqs macro
     mov ah,09h
     pop dx
+    int 21h
+endm 
+
+displayCrctAns macro
+    mov ah,09h
+    lea dx,correctAns
+    int 21h
+    
+    mov ah,02h
+    mov dl,bl
     int 21h
 endm
 
@@ -95,10 +109,9 @@ code segment
       mov bx,[si] 
       display menu
       display nl        
-      displayqs 
-      call timer 
       displayqs  
-      display nl 
+      displayqs  
+      display enter 
       call checkans
       inc si
       cmp bp,sp   
@@ -110,24 +123,36 @@ code segment
     display outof
     mov ah,4ch   
     int 21h     
-    checkans proc  
-     input 
-     cmp al,bl
-     jz harp: 
-     display wrong 
+    checkans proc
+     mov timer_delay,06h 
+     input           
      call timer
-     clear
+     mov timer_delay,20h 
+     cmp al,31h
+     jc invalid
+     cmp al,35h
+     jnc invalid
+     cmp al,bl
+     jz harp:
+     display wrong
+     displayCrctAns 
+     jmp back
      ret
      harp:
      display crrct 
-     call timer 
-     clear
      inc cl  
-     ret
+     jmp back
+     ret  
+     invalid:
+     display invalidOpt
+     displayCrctAns
+     back:
+     call timer
+     clear
     endp
     timer proc 
        mov bh,00h
-       mov ch,22h
+       mov ch,timer_delay
        big:    
        inc bh
        cmp bh,ch    
