@@ -1,5 +1,5 @@
 data segment  
-    menu db "QUIZ",0ah,0dh,"1.default quiz",0ah,0dh,"2.custom quiz", "$" 
+    menu db 0dh,0dh,"               QUIZ","$" 
     
     q1 db 0ah,0dh,"How to delete a directory in linux?" ,"$"
     a1 db 0ah,0dh,"1.remove",0ah,0dh,"2.ls",0ah,0dh,"3.delete",0ah,0dh,"4.rmdir",0ah,0ah,"$"  
@@ -9,13 +9,23 @@ data segment
     a3 db 0ah,0dh,"1.ps",0ah,0dh,"2.service",0ah,0dh,"3.oterm",0ah,0dh,"4.xrun",0ah,0ah,"$"
     q4 db 0ah,0dh,"Which of the following is a text editor that can be used in command mode to edit files on a Linux system?","$"
     a4 db 0ah,0dh,"1.open",0ah,0dh,"2.vi or vim",0ah,0dh,"3.lsof",0ah,0dh,"4.edit",0ah,0ah,"$"
-    q5 db 0ah,0dh,"Which command is used to create file archives in Linux?","$"
-    a5 db 0ah,0dh,"1.ps",0ah,0dh,"2.arc",0ah,0dh,"3.zip",0ah,0dh,"4.tar",0ah,0ah,"$" 
+    q5 db 0ah,0dh,"Which command is used to create file archives in Linux?","$"  
+    a5 db 0ah,0dh,"1.ps",0ah,0dh,"2.arc",0ah,0dh,"3.zip",0ah,0dh,"4.tar",0ah,0ah,"$"  
+    q6 db 0ah,0dh,"Which command is used to list contents of directories in Linux?","$"  
+    a6 db 0ah,0dh,"1.tar",0ah,0dh,"2.dir",0ah,0dh,"3.lp",0ah,0dh,"4.ls",0ah,0ah,"$"   
+    q7 db 0ah,0dh,"Software licensing that allows for modifications in all cases is called?","$"  
+    a7 db 0ah,0dh,"1.freeware",0ah,0dh,"2.shareware",0ah,0dh,"3.open source",0ah,0dh,"4.closed source",0ah,0ah,"$" 
+    q8 db 0ah,0dh,"Which of the following command would not be found in an assembly language?","$"  
+    a8 db 0ah,0dh,"1.STORE",0ah,0dh,"2.SORT",0ah,0dh,"3.ADD",0ah,0dh,"4.LOAD",0ah,0ah,"$" 
+    q9 db 0ah,0dh,"Which of the following is not a programming language?","$"  
+    a9 db 0ah,0dh,"1.Typescript",0ah,0dh,"2.Anaconda",0ah,0dh,"3.Dart",0ah,0dh,"4.Rust",0ah,0ah,"$" 
+    
     crrct db 0ah,0dh,"Your Answer is correct ","$"
     wrong db 0ah,0dh,"Your Answer is wrong ","$"  
-    cong db 0ah,0dh,"Congrats your score :","$"
+    cong db "Congrats! your score :","$"    
+    outof db "/9$"
     nl db 0ah,0dh,"$"    
-    ans db 33h,32h,31h,32h,34h  
+    ans db 33h,32h,31h,32h,34h,34h,33h,32h,32h
     count db 00h
     countdf db 01h  
     prevq dw 0ffh dup(?)
@@ -56,8 +66,17 @@ code segment
     start:   
     mov ax,data
     mov ds,ax    
+     
     
-    lea si,ans    
+    lea si,ans   
+    insertquiz a9
+    insertquiz q9 
+    insertquiz a8
+    insertquiz q8    
+    insertquiz a7
+    insertquiz q7 
+    insertquiz a6
+    insertquiz q6    
     insertquiz a5
     insertquiz q5 
     insertquiz a4
@@ -67,12 +86,17 @@ code segment
     insertquiz a2
     insertquiz q2
     insertquiz a1
-    insertquiz q1
+    insertquiz q1 
+    clear
+     
+    
     mov cl,00h
     loop1: 
-      mov bx,[si]
-      display nl         
-      displayqs  
+      mov bx,[si] 
+      display menu
+      display nl        
+      displayqs 
+      call timer 
       displayqs  
       display nl 
       call checkans
@@ -80,11 +104,12 @@ code segment
       cmp bp,sp   
       jne loop1 
     
-    display cong 
+    display cong  
     add cl,30h  
-    output cl
-    mov ah,4ch
-    int 21h
+    output cl 
+    display outof
+    mov ah,4ch   
+    int 21h     
     checkans proc  
      input 
      cmp al,bl
